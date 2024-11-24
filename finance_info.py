@@ -20,12 +20,12 @@ fred_api_key = os.getenv('FRED_API_KEY')
 
 email_list = json.loads(os.getenv('EMAIL_LIST'))
 
-# Initialize the Fred object
 fred = Fred(api_key=fred_api_key)
 
-# File where data will be saved
+# File that stores the GS20 value
 fred_data_file = 'us_20_year_treasury_yield.json'
 
+# Reads the GS20 value from file
 def get_last_saved_gs20_value():
     if os.path.exists(fred_data_file):
         with open(fred_data_file, 'r') as file:
@@ -54,12 +54,7 @@ def save_data(value, date):
         json.dump(data, file, indent=4)
     print(f"Data saved: {value} on {date}")
 
-def get_current_month():
-    # Get the current date
-    current_date = datetime.datetime.today()
-
-    return datetime.datetime(current_date.year, current_date.month, 1).strftime('%Y-%m')
-
+# Returns the previous month as YYYY-MM
 def get_last_completed_month():
     # Get the current date
     current_date = datetime.datetime.today()
@@ -75,6 +70,7 @@ def get_last_completed_month():
 
     return last_completed_month
 
+# Uses FRED API to get the updated GS20 value since this is updated monthly
 def fetch_gs20():
     # Get the latest monthly value for the US 20-Year Treasury Yield (GS20)
     series_id = 'GS20'
@@ -84,6 +80,7 @@ def fetch_gs20():
     latest_value = data.iloc[-1]
     return latest_value
 
+# Conditionally retrieve the GS20 value
 def fetch_gs20_if_needed():
     # Get the last completed month
     previous_month = get_last_completed_month()
@@ -105,13 +102,12 @@ def fetch_gs20_if_needed():
 
     return value
 
-# Function to fetch S&P 500, Nasdaq Composite, Treasury yields, and US 30 Year Treasury Yield
+# Function to fetch from yfinance API
 def fetch_financial_data():
     tickers = {
         "S&P 500": "^GSPC",         # S&P 500 Index
         "Nasdaq Composite": "^IXIC", # Nasdaq Composite Index
         "US 10 Year Treasury Yield": "^TNX",  # 10-Year Treasury Yield
-        # "US 30 Year Treasury Yield": "^TYX",  # 30-Year Treasury Yield
     }
 
     data = {}
@@ -128,7 +124,7 @@ def fetch_financial_data():
 
     return data
 
-# Function to fetch GBP to USD exchange rate using an API
+# Function to fetch GBP to USD exchange rate
 def fetch_exchange_rate():
     url = "https://api.exchangerate-api.com/v4/latest/GBP"  # API endpoint for GBP to USD exchange rate
     response = requests.get(url)
